@@ -1,6 +1,6 @@
 {
   "extends": "./tsconfig.base.json",
-  "files": ["0001-tenancy-foundations.ts", "vitest.config.ts"],
+  "files": ["vitest.config.ts"],
   "references": [
     { "path": "./packages/platform-core" },
     { "path": "./packages/ipc-autopilot" },

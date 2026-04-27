@@ -24,6 +24,7 @@ Monorepo structure:
 - Root tooling configs: `package.json`, `pnpm-workspace.yaml`, `tsconfig.json`, `tsconfig.base.json`, `eslint.config.js`, `.prettierrc.json`, `vitest.config.ts`, `.gitignore`, `.editorconfig`, `.nvmrc`, `.env.example`.
 - Eight package skeletons under `packages/` with `package.json`, `tsconfig.json`, a one-line `src/index.ts` stub, and in four cases a README documenting the package's boundary: `platform-core`, `ipc-autopilot`, `agent-gateway`, `events-core`, `schemas`, `qa-harness`, `design-system`, `api-client`.
 - Four app skeletons under `apps/` with `package.json`, `tsconfig.json`, `next.config.mjs`, a minimal layout and landing page: `field-pwa`, `qs-dashboard`, `pm-dashboard`, `admin`.
+- Tenancy migration scaffold under `packages/platform-core/src/migrations/`.
 - CI workflows at `.github/workflows/ci.yml` (lint, typecheck, test, integration, compliance) and `.github/workflows/qa-agent.yml` (QA Agent review on PRs).
 - Compliance Mapper stub at `compliance-mapper-stub.mjs`. Catches direct LLM SDK imports outside the Agent Gateway, direct writes to `artifact_events` outside `events-core`, browser storage use, and migration files that appear tenant-scoped but lack a complete RLS block. Crude regex scanner. A real Compliance Mapper agent with its own operating manual replaces it later.
 
