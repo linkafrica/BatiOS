@@ -1,0 +1,9 @@
+node_modules/
+.corepack/
+dist/
+.next/
+coverage/
+.env
+.env.*
+!.env.example
+*.tsbuildinfo

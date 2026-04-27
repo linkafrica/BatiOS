@@ -1,0 +1,53 @@
+{
+  "name": "batios",
+  "version": "0.0.0-foundation",
+  "private": true,
+  "type": "module",
+  "description": "BatiOS — contract-native evidence, orchestration, and payment platform for African public works",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20.18.0",
+    "pnpm": ">=9.12.0"
+  },
+  "packageManager": "pnpm@9.12.0",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "corepack pnpm -r build",
+    "lint": "corepack pnpm -r lint",
+    "lint:fix": "corepack pnpm -r lint:fix",
+    "test": "corepack pnpm -r test",
+    "test:integration": "corepack pnpm -r test:integration",
+    "typecheck": "corepack pnpm -r typecheck",
+    "clean": "corepack pnpm -r clean && node -e \"require('node:fs').rmSync('node_modules',{recursive:true,force:true})\"",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md,yaml,yml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,json,md,yaml,yml}\"",
+    "qa:harness": "corepack pnpm --filter @batios/qa-harness exec qa",
+    "compliance:scan": "node compliance-mapper-stub.mjs"
+  },
+  "dependencies": {
+    "kysely": "^0.27.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.16.5",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@next/eslint-plugin-next": "^15.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.8.0",
+    "@typescript-eslint/parser": "^8.8.0",
+    "eslint": "^9.12.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.31.0",
+    "prettier": "^3.3.3",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "typescript": "^5.6.3"
+    }
+  }
+}

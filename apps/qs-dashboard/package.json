@@ -1,0 +1,21 @@
+{
+  "name": "@batios/qs-dashboard",
+  "version": "0.0.0-foundation",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint \"app/**/*.{ts,tsx}\"",
+    "lint:fix": "eslint \"app/**/*.{ts,tsx}\" --fix",
+    "test": "vitest run --passWithNoTests",
+    "test:integration": "vitest run --passWithNoTests --dir test/integration",
+    "clean": "node -e \"require('node:fs').rmSync('.next',{recursive:true,force:true})\""
+  },
+  "dependencies": {
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}

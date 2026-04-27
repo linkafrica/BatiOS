@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.base.json",
+  "files": ["0001-tenancy-foundations.ts", "vitest.config.ts"],
+  "references": [
+    { "path": "./packages/platform-core" },
+    { "path": "./packages/ipc-autopilot" },
+    { "path": "./packages/agent-gateway" },
+    { "path": "./packages/events-core" },
+    { "path": "./packages/schemas" },
+    { "path": "./packages/qa-harness" },
+    { "path": "./packages/design-system" },
+    { "path": "./packages/api-client" }
+  ]
+}

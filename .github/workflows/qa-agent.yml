@@ -1,0 +1,11 @@
+name: QA Agent
+
+on:
+  pull_request:
+
+jobs:
+  qa-agent:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "QA Agent review placeholder"
