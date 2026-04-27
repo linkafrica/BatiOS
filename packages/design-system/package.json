@@ -13,5 +13,8 @@
     "test": "vitest run --passWithNoTests",
     "test:integration": "vitest run --passWithNoTests --dir test/integration",
     "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\""
+  },
+  "dependencies": {
+    "react": "^19.0.0"
   }
 }

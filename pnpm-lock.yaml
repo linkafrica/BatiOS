@@ -56,6 +56,9 @@ importers:
 
   apps/admin:
     dependencies:
+      '@batios/design-system':
+        specifier: workspace:*
+        version: link:../../packages/design-system
       next:
         specifier: ^15.0.0
         version: 15.5.15(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -80,6 +83,9 @@ importers:
 
   apps/pm-dashboard:
     dependencies:
+      '@batios/design-system':
+        specifier: workspace:*
+        version: link:../../packages/design-system
       next:
         specifier: ^15.0.0
         version: 15.5.15(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -92,6 +98,9 @@ importers:
 
   apps/qs-dashboard:
     dependencies:
+      '@batios/design-system':
+        specifier: workspace:*
+        version: link:../../packages/design-system
       next:
         specifier: ^15.0.0
         version: 15.5.15(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -106,7 +115,11 @@ importers:
 
   packages/api-client: {}
 
-  packages/design-system: {}
+  packages/design-system:
+    dependencies:
+      react:
+        specifier: ^19.0.0
+        version: 19.2.5
 
   packages/events-core:
     dependencies:
