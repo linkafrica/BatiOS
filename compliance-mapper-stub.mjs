@@ -59,7 +59,7 @@ const RULES = [
 function walk(dir, callback) {
   for (const entry of readdirSync(dir)) {
     const full = join(dir, entry);
-    const rel = relative(REPO_ROOT, full);
+    const rel = relative(REPO_ROOT, full).replaceAll('\\', '/');
     if (
       entry === 'node_modules' ||
       entry === 'dist' ||
