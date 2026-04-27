@@ -46,20 +46,41 @@ const databaseUrl = process.env.BATIOS_TEST_DATABASE_URL;
 const describeWithDatabase = databaseUrl ? describe : describe.skip;
 
 describeWithDatabase('tenancy foundations migration', () => {
-  let pool: Pool;
+  let adminPool: Pool;
+  let adminDb: Kysely<TenancyTestDatabase>;
+  let appPool: Pool;
   let db: Kysely<TenancyTestDatabase>;
 
   beforeAll(async () => {
-    pool = new Pool({ connectionString: databaseUrl });
-    db = new Kysely<TenancyTestDatabase>({
-      dialect: new PostgresDialect({ pool }),
+    adminPool = new Pool({ connectionString: databaseUrl });
+    adminDb = new Kysely<TenancyTestDatabase>({
+      dialect: new PostgresDialect({ pool: adminPool }),
     });
 
-    await migratePlatformToLatest(db);
+    await migratePlatformToLatest(adminDb);
+    await sql`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'batios_app') THEN
+          CREATE ROLE batios_app LOGIN PASSWORD 'batios_app';
+        END IF;
+      END
+      $$;
+    `.execute(adminDb);
+    await sql`GRANT USAGE ON SCHEMA public TO batios_app`.execute(adminDb);
+    await sql`GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO batios_app`.execute(
+      adminDb,
+    );
+
+    appPool = new Pool({ connectionString: createAppDatabaseUrl(databaseUrl) });
+    db = new Kysely<TenancyTestDatabase>({
+      dialect: new PostgresDialect({ pool: appPool }),
+    });
   });
 
   afterAll(async () => {
     await db.destroy();
+    await adminDb.destroy();
   });
 
   it('enforces owner-only organisation reads and joint-custody project reads', async () => {
@@ -149,3 +170,14 @@ describeWithDatabase('tenancy foundations migration', () => {
     await expect(db.selectFrom('projects').selectAll().execute()).resolves.toHaveLength(0);
   });
 });
+
+function createAppDatabaseUrl(connectionString: string | undefined): string {
+  if (!connectionString) {
+    throw new Error('BATIOS_TEST_DATABASE_URL is required');
+  }
+
+  const url = new URL(connectionString);
+  url.username = 'batios_app';
+  url.password = 'batios_app';
+  return url.toString();
+}
