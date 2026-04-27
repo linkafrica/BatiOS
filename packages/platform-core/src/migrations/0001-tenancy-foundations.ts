@@ -442,7 +442,7 @@ export async function up(db: Kysely<unknown>): Promise<void> {
   `.execute(db);
 }
 
-export async function down(_db: Kysely<unknown>): Promise<void> {
+export async function down(_db?: Kysely<unknown>): Promise<void> {
   // No down migrations per platform architecture. Roll back by restoring a prior
   // snapshot and re-running migrations forward.
   throw new Error(
