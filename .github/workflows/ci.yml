@@ -38,4 +38,5 @@ jobs:
       - run: pnpm -r test
         env:
           BATIOS_TEST_DATABASE_URL: postgres://batios:batios@localhost:5432/batios_test
+      - run: pnpm qa:harness
       - run: node compliance-mapper-stub.mjs

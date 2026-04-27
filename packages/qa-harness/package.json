@@ -13,6 +13,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
+    "qa": "node dist/index.js",
     "test": "vitest run --passWithNoTests",
     "test:integration": "vitest run --passWithNoTests --dir test/integration",
     "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\""
