@@ -1,38 +1,41 @@
 #!/usr/bin/env node
 /**
- * Compliance Mapper stub (Week 0 version).
+ * Compliance Mapper stub (foundation version).
  *
  * Regex-based scan for common architectural violations. This is deliberately
- * crude; a real Compliance Mapper agent with AST parsing and database-aware RLS
- * tests must replace it later.
- *
- * What this stub catches:
- *   - Direct LLM SDK imports or require() calls outside packages/agent-gateway
- *   - Direct INSERT/UPDATE/DELETE on artifact_events outside packages/events-core
- *   - localStorage or sessionStorage use
- *   - Migration files that create tenant-like tables but do not enable RLS and
- *     define at least one CREATE POLICY block
- *
- * What this stub does NOT catch:
- *   - Semantic RLS errors, policy recursion, or wrong policy predicates
- *   - Dynamic imports, obfuscated imports, generated code, or comments/strings
- *   - Cross-tenant retrieval leakage in agent calls
- *   - Methodology-reference validation gaps
- *   - Cascade atomicity violations
+ * conservative; a real Compliance Mapper agent with AST parsing, dataflow, and
+ * database-aware RLS tests should replace it later.
  */
 
+import { pathToFileURL } from 'node:url';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { extname, join, relative } from 'node:path';
+import { extname, join, relative, resolve } from 'node:path';
 
-const REPO_ROOT = process.cwd();
-const violations = [];
+const DEFAULT_REPO_ROOT = process.cwd();
 
-const RULES = [
+export const RULES = [
   {
     id: 'LLM_SDK_OUTSIDE_GATEWAY',
     description: 'Direct LLM SDK import outside packages/agent-gateway',
     pattern:
       /(?:from\s+['"]|import\(['"]|require\(['"])(@anthropic-ai\/sdk|openai|@google\/generative-ai)['"]\)?/,
+    allowedPath: /^packages\/agent-gateway\//,
+    severity: 'REJECT',
+    extensions: ['.ts', '.tsx', '.js', '.mjs', '.cjs'],
+  },
+  {
+    id: 'LLM_PROVIDER_HTTP_OUTSIDE_GATEWAY',
+    description: 'Direct LLM provider HTTP call outside packages/agent-gateway',
+    pattern:
+      /https:\/\/api\.(openai|anthropic)\.com|https:\/\/generativelanguage\.googleapis\.com/i,
+    allowedPath: /^packages\/agent-gateway\//,
+    severity: 'REJECT',
+    extensions: ['.ts', '.tsx', '.js', '.mjs', '.cjs'],
+  },
+  {
+    id: 'LLM_PROVIDER_SECRET_OUTSIDE_GATEWAY',
+    description: 'Direct LLM provider secret access outside packages/agent-gateway',
+    pattern: /process\.env\.(OPENAI_API_KEY|ANTHROPIC_API_KEY|GOOGLE_GENERATIVE_AI_API_KEY)\b/,
     allowedPath: /^packages\/agent-gateway\//,
     severity: 'REJECT',
     extensions: ['.ts', '.tsx', '.js', '.mjs', '.cjs'],
@@ -56,24 +59,79 @@ const RULES = [
   },
 ];
 
-function walk(dir, callback) {
+const IGNORED_ENTRIES = new Set(['node_modules', 'dist', '.next', '.git', 'scratch', 'coverage']);
+
+export function scanRepository(repoRoot = DEFAULT_REPO_ROOT) {
+  const root = resolve(repoRoot);
+  const violations = [];
+
+  walk(root, root, (fullPath, relPath) => {
+    const extension = extname(relPath);
+    let content;
+    try {
+      content = readFileSync(fullPath, 'utf8');
+    } catch {
+      return;
+    }
+
+    for (const rule of RULES) {
+      if (!rule.extensions.includes(extension)) continue;
+      if (rule.allowedPath && rule.allowedPath.test(relPath)) continue;
+
+      const lines = content.split('\n');
+      for (let i = 0; i < lines.length; i++) {
+        if (rule.pattern.test(lines[i])) {
+          addViolation(violations, {
+            rule: rule.id,
+            severity: rule.severity,
+            description: rule.description,
+            file: relPath,
+            line: i + 1,
+            snippet: lines[i],
+          });
+        }
+      }
+    }
+
+    if (isMigrationPath(relPath) && /createTable\(|CREATE\s+TABLE/i.test(content)) {
+      const appearsTenantScoped = /organisation_id|tenant_hash|project_id/i.test(content);
+      const enablesRls = /ENABLE\s+ROW\s+LEVEL\s+SECURITY/i.test(content);
+      const forcesRls = /FORCE\s+ROW\s+LEVEL\s+SECURITY/i.test(content);
+      const hasPolicy = /CREATE\s+POLICY/i.test(content);
+
+      if (appearsTenantScoped && (!enablesRls || !forcesRls || !hasPolicy)) {
+        addViolation(violations, {
+          rule: 'TENANT_MIGRATION_WITHOUT_RLS_BLOCK',
+          severity: 'BLOCK',
+          description:
+            'Migration appears tenant-scoped but does not include ENABLE RLS, FORCE RLS, and at least one CREATE POLICY block',
+          file: relPath,
+          snippet: 'tenant-like migration missing complete RLS block',
+        });
+      }
+    }
+  });
+
+  return {
+    clean: violations.length === 0,
+    violations,
+    hasBlock: violations.some((violation) => violation.severity === 'BLOCK'),
+    hasReject: violations.some((violation) => violation.severity === 'REJECT'),
+  };
+}
+
+function walk(root, dir, callback) {
   for (const entry of readdirSync(dir)) {
-    const full = join(dir, entry);
-    const rel = relative(REPO_ROOT, full).replaceAll('\\', '/');
-    if (
-      entry === 'node_modules' ||
-      entry === 'dist' ||
-      entry === '.next' ||
-      entry === '.git' ||
-      entry === 'scratch' ||
-      entry.startsWith('.')
-    ) {
+    if (IGNORED_ENTRIES.has(entry) || entry.startsWith('.')) {
       continue;
     }
 
+    const full = join(dir, entry);
+    const rel = relative(root, full).replaceAll('\\', '/');
     const stat = statSync(full);
+
     if (stat.isDirectory()) {
-      walk(full, callback);
+      walk(root, full, callback);
     } else {
       callback(full, rel);
     }
@@ -84,81 +142,59 @@ function isMigrationPath(relPath) {
   return /(^|\/)migrations\//.test(relPath) || /^\d{4}[-_].*\.(ts|sql)$/.test(relPath);
 }
 
-function addViolation({ rule, severity, description, file, line = 1, snippet = '' }) {
-  violations.push({ rule, severity, description, file, line, snippet: snippet.trim().slice(0, 120) });
+function addViolation(violations, { rule, severity, description, file, line = 1, snippet = '' }) {
+  violations.push({
+    rule,
+    severity,
+    description,
+    file,
+    line,
+    snippet: snippet.trim().slice(0, 120),
+  });
 }
 
-walk(REPO_ROOT, (fullPath, relPath) => {
-  const extension = extname(relPath);
-  let content;
-  try {
-    content = readFileSync(fullPath, 'utf8');
-  } catch {
-    return;
+export function formatScanResult(result) {
+  if (result.clean) {
+    return 'compliance-mapper: clean\n';
   }
 
-  for (const rule of RULES) {
-    if (!rule.extensions.includes(extension)) continue;
-    if (rule.allowedPath && rule.allowedPath.test(relPath)) continue;
-
-    const lines = content.split('\n');
-    for (let i = 0; i < lines.length; i++) {
-      if (rule.pattern.test(lines[i])) {
-        addViolation({
-          rule: rule.id,
-          severity: rule.severity,
-          description: rule.description,
-          file: relPath,
-          line: i + 1,
-          snippet: lines[i],
-        });
-      }
-    }
+  const lines = ['compliance-mapper: violations found', ''];
+  for (const violation of result.violations) {
+    lines.push(`[${violation.severity}] ${violation.rule}`);
+    lines.push(`  ${violation.file}:${violation.line}`);
+    lines.push(`  ${violation.description}`);
+    lines.push(`  > ${violation.snippet}`);
+    lines.push('');
   }
 
-  if (isMigrationPath(relPath) && /createTable\(|CREATE\s+TABLE/i.test(content)) {
-    const appearsTenantScoped = /organisation_id|tenant_hash|project_id/i.test(content);
-    const enablesRls = /ENABLE\s+ROW\s+LEVEL\s+SECURITY/i.test(content);
-    const forcesRls = /FORCE\s+ROW\s+LEVEL\s+SECURITY/i.test(content);
-    const hasPolicy = /CREATE\s+POLICY/i.test(content);
-
-    if (appearsTenantScoped && (!enablesRls || !forcesRls || !hasPolicy)) {
-      addViolation({
-        rule: 'TENANT_MIGRATION_WITHOUT_RLS_BLOCK',
-        severity: 'BLOCK',
-        description:
-          'Migration appears tenant-scoped but does not include ENABLE RLS, FORCE RLS, and at least one CREATE POLICY block',
-        file: relPath,
-        snippet: 'tenant-like migration missing complete RLS block',
-      });
-    }
+  if (result.hasBlock) {
+    lines.push('BLOCK-class violation detected. No override path. Remediate before merging.');
+  } else if (result.hasReject) {
+    lines.push(
+      'REJECT-class violation detected. Override via ADR-0005 two-signer protocol or remediate.',
+    );
   }
-});
 
-if (violations.length === 0) {
-  console.log('compliance-mapper: clean');
-  process.exit(0);
+  return `${lines.join('\n')}\n`;
 }
 
-console.error('compliance-mapper: violations found');
-console.error('');
-for (const v of violations) {
-  console.error(`[${v.severity}] ${v.rule}`);
-  console.error(`  ${v.file}:${v.line}`);
-  console.error(`  ${v.description}`);
-  console.error(`  > ${v.snippet}`);
-  console.error('');
+function exitCodeFor(result) {
+  if (result.hasBlock) return 2;
+  if (result.hasReject) return 1;
+  return 0;
 }
 
-const hasBlock = violations.some((v) => v.severity === 'BLOCK');
-const hasReject = violations.some((v) => v.severity === 'REJECT');
+const isCli = import.meta.url === pathToFileURL(process.argv[1] ?? '').href;
 
-if (hasBlock) {
-  console.error('BLOCK-class violation detected. No override path. Remediate before merging.');
-  process.exit(2);
+if (isCli) {
+  const result = scanRepository(process.argv[2] ?? DEFAULT_REPO_ROOT);
+  const output = formatScanResult(result);
+
+  if (result.clean) {
+    process.stdout.write(output);
+  } else {
+    process.stderr.write(output);
+  }
+
+  process.exit(exitCodeFor(result));
 }
-if (hasReject) {
-  console.error('REJECT-class violation detected. Override via ADR-0005 two-signer protocol or remediate.');
-  process.exit(1);
-}
-process.exit(0);
