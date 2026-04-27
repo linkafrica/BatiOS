@@ -155,12 +155,10 @@ export async function up(db: Kysely<unknown>): Promise<void> {
     .addColumn('organisation_id', 'uuid', (c) =>
       c.notNull().references('organisations.organisation_id').onDelete('restrict'),
     )
-    .addColumn('tenant_hash', 'text', (c) =>
-      c
-        .notNull()
-        .generatedAlwaysAs(
-          sql`encode(digest(organisation_id::text || ':' || project_id::text, 'sha256'), 'hex')`,
-        ),
+    .addColumn(
+      'tenant_hash',
+      sql`text GENERATED ALWAYS AS (encode(digest(organisation_id::text || ':' || project_id::text, 'sha256'), 'hex')) STORED`,
+      (c) => c.notNull(),
     )
     .addColumn('display_name', 'text', (c) => c.notNull())
     .addColumn('contract_reference', 'text', (c) => c.notNull())
@@ -221,12 +219,10 @@ export async function up(db: Kysely<unknown>): Promise<void> {
     .addColumn('organisation_id', 'uuid', (c) =>
       c.notNull().references('organisations.organisation_id').onDelete('restrict'),
     )
-    .addColumn('tenant_hash', 'text', (c) =>
-      c
-        .notNull()
-        .generatedAlwaysAs(
-          sql`encode(digest(organisation_id::text || ':' || project_id::text, 'sha256'), 'hex')`,
-        ),
+    .addColumn(
+      'tenant_hash',
+      sql`text GENERATED ALWAYS AS (encode(digest(organisation_id::text || ':' || project_id::text, 'sha256'), 'hex')) STORED`,
+      (c) => c.notNull(),
     )
     .addColumn('party_role', 'text', (c) => c.notNull())
     .addColumn('custody_level', 'text', (c) => c.notNull().defaultTo('read'))
@@ -338,12 +334,10 @@ export async function up(db: Kysely<unknown>): Promise<void> {
     .addColumn('user_id', 'uuid', (c) => c.notNull())
     .addColumn('project_id', 'uuid', (c) => c.notNull())
     .addColumn('organisation_id', 'uuid', (c) => c.notNull())
-    .addColumn('tenant_hash', 'text', (c) =>
-      c
-        .notNull()
-        .generatedAlwaysAs(
-          sql`encode(digest(organisation_id::text || ':' || project_id::text, 'sha256'), 'hex')`,
-        ),
+    .addColumn(
+      'tenant_hash',
+      sql`text GENERATED ALWAYS AS (encode(digest(organisation_id::text || ':' || project_id::text, 'sha256'), 'hex')) STORED`,
+      (c) => c.notNull(),
     )
     .addColumn('role', 'text', (c) => c.notNull())
     .addColumn('granted_at', 'timestamptz', (c) => c.notNull().defaultTo(sql`now()`))
