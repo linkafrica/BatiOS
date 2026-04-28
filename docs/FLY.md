@@ -6,12 +6,14 @@ Fly config.
 
 ## Apps
 
-| Surface      | Fly config                         | Staging app name              |
-| ------------ | ---------------------------------- | ----------------------------- |
-| Field PWA    | `deploy/fly/field-pwa.fly.toml`    | `batios-field-pwa-staging`    |
-| Admin        | `deploy/fly/admin.fly.toml`        | `batios-admin-staging`        |
-| PM dashboard | `deploy/fly/pm-dashboard.fly.toml` | `batios-pm-dashboard-staging` |
-| QS dashboard | `deploy/fly/qs-dashboard.fly.toml` | `batios-qs-dashboard-staging` |
+| Surface      | Staging config                     | Production config                             |
+| ------------ | ---------------------------------- | --------------------------------------------- |
+| Field PWA    | `deploy/fly/field-pwa.fly.toml`    | `deploy/fly/field-pwa.production.fly.toml`    |
+| Admin        | `deploy/fly/admin.fly.toml`        | `deploy/fly/admin.production.fly.toml`        |
+| PM dashboard | `deploy/fly/pm-dashboard.fly.toml` | `deploy/fly/pm-dashboard.production.fly.toml` |
+| QS dashboard | `deploy/fly/qs-dashboard.fly.toml` | `deploy/fly/qs-dashboard.production.fly.toml` |
+
+Production cutover requirements live in `docs/PRODUCTION.md`.
 
 ## One-Time Setup
 
