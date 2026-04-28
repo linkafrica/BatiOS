@@ -1,0 +1,11 @@
+# Ownership is advisory until branch protection is enabled.
+
+* @linkafrica
+
+/apps/ @linkafrica
+/packages/platform-core/ @linkafrica
+/packages/events-core/ @linkafrica
+/packages/agent-gateway/ @linkafrica
+/packages/ipc-autopilot/ @linkafrica
+/.github/ @linkafrica
+/docs/ @linkafrica
