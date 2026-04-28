@@ -31,6 +31,9 @@ reviewed commit, linked PRs, backup and restore evidence, smoke results,
 monitoring checks, rollback owner, and signoffs. Do not include secret values or
 customer data.
 
+Production database provider, region, backup, and restore rehearsal decisions
+must follow `docs/PRODUCTION_DATABASE.md`.
+
 ## Review Requirements
 
 - Pull request links to the tracked issue.

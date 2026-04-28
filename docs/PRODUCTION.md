@@ -21,6 +21,8 @@ first real load profile is measured.
 ## Database Gate
 
 Production must use a verified backup and restore path before cutover.
+The database decision and restore rehearsal runbook lives in
+`docs/PRODUCTION_DATABASE.md`.
 
 Recommended path:
 
