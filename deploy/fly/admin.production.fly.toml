@@ -1,5 +1,5 @@
 app = "batios-admin"
-primary_region = "jnb"
+primary_region = "lhr"
 
 [build]
   dockerfile = "Dockerfile.next"

@@ -22,25 +22,24 @@ regions, so confirm the target region immediately before provisioning.
 
 Complete this before creating a production database:
 
-| Decision                    | Value |
-| --------------------------- | ----- |
-| Database provider           |       |
-| Region                      |       |
-| Plan                        |       |
-| Storage size                |       |
-| App region alignment        |       |
-| Backup mechanism            |       |
-| Restore rehearsal target    |       |
-| Expected monthly cost       |       |
-| Decision owner              |       |
-| Decision timestamp          |       |
-| Approval link or issue note |       |
+| Decision                    | Value                                                                    |
+| --------------------------- | ------------------------------------------------------------------------ |
+| Database provider           | Fly Managed Postgres                                                     |
+| Region                      | `lhr`                                                                    |
+| Plan                        | Basic (`basic` in `fly mpg create`)                                      |
+| Storage size                | 10 GB                                                                    |
+| App region alignment        | Colocate production apps in `lhr`                                        |
+| Backup mechanism            | Fly Managed Postgres automated backups plus manual backup before cutover |
+| Restore rehearsal target    | Separate restored Managed Postgres cluster before cutover                |
+| Expected monthly cost       | About $38/month plus 10 GB provisioned storage                           |
+| Decision owner              | LinkAfrica operator                                                      |
+| Decision timestamp          | 2026-04-28                                                               |
+| Approval link or issue note | Issue #35                                                                |
 
-Recommended default: Fly Managed Postgres, Postgres 16, smallest acceptable
-production plan, 10 GB initial storage, and an application region close to the
-database region. If `jnb` is not available for Managed Postgres, choose between
-moving production apps near the database or accepting cross-region latency from
-`jnb`.
+Production decision: Fly Managed Postgres, Postgres 16, Basic plan, 10 GB
+initial storage, and production apps colocated in `lhr`. This avoids
+application-to-database cross-region latency after cutover and keeps production
+on the managed backup and recovery path.
 
 ## Option A: Fly Managed Postgres
 
@@ -54,9 +53,9 @@ Provision:
 fly mpg create \
   --name batios-production-db \
   --org personal \
-  --region <region> \
+  --region lhr \
   --pg-major-version 16 \
-  --plan <plan> \
+  --plan basic \
   --volume-size 10
 ```
 
