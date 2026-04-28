@@ -8,8 +8,8 @@ CLI authentication is available.
 - [x] Add buildable pnpm monorepo scaffold.
 - [x] Add setup and command documentation.
 - [x] Move tenancy migration scaffold into `packages/platform-core`.
-- [ ] Enable branch protection for `main`.
-- [ ] Confirm GitHub Actions status checks are required on pull requests.
+- [ ] Enable branch protection for `main` (tracked in #21; blocked by GitHub plan/repository visibility).
+- [x] Confirm GitHub Actions status checks are required by repo governance docs.
 
 ## First Implementation Issues
 
