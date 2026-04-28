@@ -20,6 +20,7 @@ export interface QaHarnessResult {
 
 export const PRE_PR_CHECKS: readonly QaHarnessCheck[] = [
   { id: 'build', command: 'corepack pnpm build', required: true },
+  { id: 'e2e', command: 'corepack pnpm e2e:workflow', required: true },
   { id: 'lint', command: 'corepack pnpm lint', required: true },
   { id: 'typecheck', command: 'corepack pnpm typecheck', required: true },
   { id: 'test', command: 'corepack pnpm test', required: true },
@@ -29,6 +30,7 @@ export const PRE_PR_CHECKS: readonly QaHarnessCheck[] = [
 
 const scriptNamesByCheckId: Readonly<Record<string, string>> = {
   build: 'build',
+  e2e: 'e2e:workflow',
   lint: 'lint',
   typecheck: 'typecheck',
   test: 'test',
