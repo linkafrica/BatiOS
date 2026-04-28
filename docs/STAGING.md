@@ -48,6 +48,8 @@ corepack pnpm compliance:scan
 
 ## Staging Smoke Check
 
+Fly.io deployment steps live in `docs/FLY.md`.
+
 After deployment, export the four public app URLs and run:
 
 ```bash
