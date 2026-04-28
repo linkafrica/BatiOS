@@ -48,6 +48,7 @@ describe('qa harness', () => {
   it('declares the required pre-PR checks', () => {
     expect(PRE_PR_CHECKS.map((check) => check.id)).toEqual([
       'build',
+      'e2e',
       'lint',
       'typecheck',
       'test',

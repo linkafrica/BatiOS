@@ -26,6 +26,7 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,json,md,yaml,yml}\"",
     "qa:harness": "node packages/qa-harness/dist/index.js",
     "compliance:scan": "node compliance-mapper-stub.mjs",
+    "e2e:workflow": "node scripts/e2e-workflow-check.mjs",
     "staging:smoke": "node scripts/staging-smoke-check.mjs"
   },
   "dependencies": {
