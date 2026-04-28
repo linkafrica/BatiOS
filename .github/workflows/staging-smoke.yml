@@ -1,0 +1,43 @@
+name: Staging Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      field_pwa_url:
+        description: Field PWA URL
+        required: false
+        type: string
+      admin_url:
+        description: Admin dashboard URL
+        required: false
+        type: string
+      pm_dashboard_url:
+        description: PM dashboard URL
+        required: false
+        type: string
+      qs_dashboard_url:
+        description: QS dashboard URL
+        required: false
+        type: string
+  schedule:
+    - cron: '17 * * * *'
+
+jobs:
+  staging-smoke:
+    runs-on: ubuntu-latest
+    env:
+      BATIOS_FIELD_PWA_URL: ${{ inputs.field_pwa_url || vars.BATIOS_FIELD_PWA_URL || 'https://batios-field-pwa-staging.fly.dev' }}
+      BATIOS_ADMIN_URL: ${{ inputs.admin_url || vars.BATIOS_ADMIN_URL || 'https://batios-admin-staging.fly.dev' }}
+      BATIOS_PM_DASHBOARD_URL: ${{ inputs.pm_dashboard_url || vars.BATIOS_PM_DASHBOARD_URL || 'https://batios-pm-dashboard-staging.fly.dev' }}
+      BATIOS_QS_DASHBOARD_URL: ${{ inputs.qs_dashboard_url || vars.BATIOS_QS_DASHBOARD_URL || 'https://batios-qs-dashboard-staging.fly.dev' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.18.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm staging:smoke
