@@ -54,15 +54,16 @@ After deployment, export the four public app URLs and run:
 corepack pnpm staging:smoke
 ```
 
-The smoke check performs an HTTP `GET` against:
+The smoke check performs an HTTP `GET` against each app's `/healthz` endpoint:
 
 - Field PWA
 - Admin dashboard
 - PM dashboard
 - QS dashboard
 
-Each endpoint must return a 2xx or 3xx status. The script does not require or
-print secret values.
+Each endpoint must return a 2xx or 3xx status and a JSON payload with the
+expected service name, `status: "ok"`, and a valid `checkedAt` timestamp. The
+script does not require or print secret values.
 
 ## Readiness Criteria
 
