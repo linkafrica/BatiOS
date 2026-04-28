@@ -23,6 +23,14 @@ corepack pnpm compliance:scan
 3. Run `corepack pnpm staging:smoke` against deployed staging URLs.
 4. Confirm Field PWA, Admin, PM, and QS surfaces return healthy status codes.
 
+## Production Evidence
+
+For production releases, copy `docs/templates/production-release-evidence.md`
+and complete it before go/no-go signoff. The completed record must include the
+reviewed commit, linked PRs, backup and restore evidence, smoke results,
+monitoring checks, rollback owner, and signoffs. Do not include secret values or
+customer data.
+
 ## Review Requirements
 
 - Pull request links to the tracked issue.
