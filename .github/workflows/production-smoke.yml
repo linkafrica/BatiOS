@@ -1,0 +1,41 @@
+name: Production Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      field_pwa_url:
+        description: Field PWA production URL
+        required: false
+        type: string
+      admin_url:
+        description: Admin dashboard production URL
+        required: false
+        type: string
+      pm_dashboard_url:
+        description: PM dashboard production URL
+        required: false
+        type: string
+      qs_dashboard_url:
+        description: QS dashboard production URL
+        required: false
+        type: string
+
+jobs:
+  production-smoke:
+    runs-on: ubuntu-latest
+    env:
+      BATIOS_FIELD_PWA_URL: ${{ inputs.field_pwa_url || vars.BATIOS_PRODUCTION_FIELD_PWA_URL }}
+      BATIOS_ADMIN_URL: ${{ inputs.admin_url || vars.BATIOS_PRODUCTION_ADMIN_URL }}
+      BATIOS_PM_DASHBOARD_URL: ${{ inputs.pm_dashboard_url || vars.BATIOS_PRODUCTION_PM_DASHBOARD_URL }}
+      BATIOS_QS_DASHBOARD_URL: ${{ inputs.qs_dashboard_url || vars.BATIOS_PRODUCTION_QS_DASHBOARD_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20.18.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm staging:smoke

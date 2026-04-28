@@ -127,6 +127,19 @@ export BATIOS_QS_DASHBOARD_URL="https://qs.batios.example"
 corepack pnpm staging:smoke
 ```
 
+Operators can also run the `Production Smoke` GitHub Actions workflow from the
+Actions tab. Provide the four production URLs as manual inputs, or configure
+these repository variables:
+
+- `BATIOS_PRODUCTION_FIELD_PWA_URL`
+- `BATIOS_PRODUCTION_ADMIN_URL`
+- `BATIOS_PRODUCTION_PM_DASHBOARD_URL`
+- `BATIOS_PRODUCTION_QS_DASHBOARD_URL`
+
+The workflow is manual-only until production domains are live and alert
+ownership is agreed. If URLs are missing, the smoke script fails before any
+network requests and names the missing values.
+
 Before cutover, configure alerts for:
 
 - Any app `/healthz` endpoint returning non-2xx.
@@ -148,7 +161,8 @@ Application rollback:
 
 1. Find the previous good image with `fly releases --app <app-name>`.
 2. Redeploy that image with `fly deploy --image <image-ref> --app <app-name>`.
-3. Run `corepack pnpm staging:smoke` against production URLs.
+3. Run `corepack pnpm staging:smoke` or the `Production Smoke` workflow against
+   production URLs.
 4. Check app logs and database connection health.
 5. Record the rollback image, operator, reason, and result.
 
