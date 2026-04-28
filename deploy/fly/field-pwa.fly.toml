@@ -1,0 +1,29 @@
+app = "batios-field-pwa-staging"
+primary_region = "jnb"
+
+[build]
+  dockerfile = "Dockerfile.next"
+  [build.args]
+    APP_DIR = "field-pwa"
+    PACKAGE_NAME = "@batios/field-pwa"
+
+[env]
+  BATIOS_ENVIRONMENT = "staging"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+  [http_service.concurrency]
+    type = "requests"
+    soft_limit = 100
+    hard_limit = 150
+
+[[vm]]
+  memory = "1gb"
+  cpu_kind = "shared"
+  cpus = 1
