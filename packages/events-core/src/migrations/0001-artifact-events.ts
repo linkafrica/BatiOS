@@ -40,6 +40,7 @@ export async function up(db: Kysely<unknown>): Promise<void> {
           'artifact.created',
           'artifact.updated',
           'artifact.attached',
+          'artifact.vision.observed',
           'artifact.reviewed',
           'artifact.approved',
           'artifact.rejected',
