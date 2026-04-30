@@ -48,3 +48,11 @@ The first production adapter should be added behind the package interfaces and
 routed through policy and audit sinks. Provider responses should be retained as
 case records only when the request metadata allows it, and artifacts must not be
 used for model training unless a future tenant policy explicitly permits it.
+
+## Event Log Path
+
+Vision responses can be persisted through `@batios/events-core` as
+`artifact.vision.observed` events. The event payload includes provider/model
+provenance, source artifact IDs, observation count, review requirement, and the
+human-readable observations. These events are append-only and additive: they do
+not mutate the source artifact or replace human certification.

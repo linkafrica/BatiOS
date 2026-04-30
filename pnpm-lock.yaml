@@ -123,9 +123,14 @@ importers:
 
   packages/events-core:
     dependencies:
+      '@batios/evidence-vision':
+        specifier: workspace:*
+        version: link:../evidence-vision
       kysely:
         specifier: ^0.27.5
         version: 0.27.6
+
+  packages/evidence-vision: {}
 
   packages/ipc-autopilot:
     dependencies:
